@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio 3D — Sistema Solar</title>
+  <link rel="icon" type="image/svg+xml" href="../app-assets/identidad/favicon.svg">
+  <link rel="stylesheet" href="./css/studio.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="studio-header">
+    <a href="./index.html" class="back-btn"><i data-lucide="arrow-left"></i> Explorador</a>
+    <div class="studio-brand">
+      <i data-lucide="orbit"></i>
+      <span>Studio 3D — Ensamblaje del Sistema Solar</span>
+    </div>
+    <div class="studio-actions">
+      <button id="btnAutoEnsamblar" class="studio-btn"><i data-lucide="play"></i> Auto-ensamblar</button>
+      <button id="btnUndo"          class="studio-btn sec"><i data-lucide="undo-2"></i></button>
+      <button id="btnReset"         class="studio-btn sec"><i data-lucide="rotate-ccw"></i> Reiniciar</button>
+    </div>
+  </header>
+
+  <div class="studio-workspace">
+
+    <!-- Left sidebar: planet cards -->
+    <aside class="studio-sidebar">
+      <div class="sidebar-hdr">
+        <span>CUERPOS CELESTES</span>
+        <span id="progressText" class="progress-text">0 / 10 colocados</span>
+      </div>
+      <div class="progress-bar-wrap"><div id="progressBar" class="progress-bar" style="width:0%"></div></div>
+      <div id="pieceGrid" class="piece-grid"></div>
+    </aside>
+
+    <!-- Center: Three.js canvas -->
+    <main class="studio-canvas-wrap">
+      <canvas id="studioCanvas"></canvas>
+      <div id="studioHint" class="studio-hint">
+        Selecciona un planeta y haz clic en su órbita para colocarlo
+      </div>
+      <div id="labelLayer" class="label-layer"></div>
+    </main>
+
+    <!-- Right panel: info -->
+    <aside class="studio-info">
+      <div class="info-placeholder" id="infoPlaceholder">
+        <i data-lucide="planet" style="width:36px;height:36px;color:var(--text3)"></i>
+        <p>Selecciona un planeta para ver información</p>
+      </div>
+      <div id="infoContent" class="info-content" style="display:none"></div>
+    </aside>
+
+  </div>
+
+  <!-- Completion banner -->
+  <div id="completeBanner" class="complete-banner hidden">
+    <div class="complete-box">
+      <div class="complete-icon">🎉</div>
+      <h2>¡Sistema Solar Completo!</h2>
+      <p>Has colocado correctamente los 10 cuerpos celestes.</p>
+      <div class="complete-btns">
+        <button id="btnResetComplete" class="studio-btn">Reiniciar</button>
+        <a href="./index.html" class="studio-btn">Ir al Explorador</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="studioToast" class="toast hidden"></div>
+
+  <script src="./js/studio.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => { lucide.createIcons(); });</script>
+</body>
+</html>

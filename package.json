@@ -1,0 +1,15 @@
+{
+  "name": "sistema-solar-3d",
+  "version": "1.0.0",
+  "description": "Explorador interactivo del Sistema Solar en 3D",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "playwright": "^1.60.0"
+  }
+}

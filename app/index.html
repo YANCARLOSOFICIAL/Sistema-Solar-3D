@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema Solar Studio</title>
+  <link rel="icon" type="image/svg+xml" href="../app-assets/identidad/favicon.svg">
+  <link rel="stylesheet" href="./css/styles.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+</head>
+<body>
+
+  <!-- ── Topbar ── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <img class="brand-logo" src="../app-assets/identidad/logo.svg" alt="Sistema Solar Studio">
+    </div>
+    <nav class="topbar-nav">
+      <button class="nav-btn active" data-view="explorador">Explorador</button>
+      <button class="nav-btn" data-view="galeria">Galería</button>
+      <button class="nav-btn" data-view="studio">Studio 3D</button>
+      <button class="nav-btn" data-view="biblioteca">Biblioteca</button>
+      <button class="nav-btn" data-view="cuaderno">Cuaderno</button>
+      <button class="nav-btn" data-view="ajustes">Ajustes</button>
+    </nav>
+    <div class="topbar-right">
+      <div class="avatar-btn">🌌</div>
+    </div>
+  </header>
+
+  <!-- ── Workspace ── -->
+  <div class="workspace">
+
+    <!-- Left column -->
+    <aside class="left-column">
+      <div class="search-wrap">
+        <i data-lucide="search"></i>
+        <input id="searchInput" type="text" placeholder="Buscar cuerpo celeste…" autocomplete="off">
+      </div>
+      <div id="bodyList" class="organ-list"></div>
+    </aside>
+
+    <!-- Center column -->
+    <section class="center-column">
+
+      <!-- Viewer header -->
+      <div class="viewer-header">
+        <div class="viewer-title-area">
+          <h1 id="viewerTitle">Sistema Solar</h1>
+          <span id="viewerSystem" class="viewer-system">Selecciona un cuerpo celeste</span>
+        </div>
+        <div class="viewer-modes">
+          <div class="mode-tabs">
+            <button class="mode-btn active" data-mode="3D">3D</button>
+            <button class="mode-btn" data-mode="AR">AR</button>
+            <button class="mode-btn" data-mode="360">360°</button>
+          </div>
+          <label class="fondo-toggle">
+            <input type="checkbox" id="toggleStars" checked>
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-text">Fondo estelar</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 3D Viewer -->
+      <div class="viewer-card">
+        <div id="viewerStage" class="viewer-stage">
+          <canvas id="starCanvas"></canvas>
+          <model-viewer
+            id="modelViewer"
+            camera-controls
+            auto-rotate
+            rotation-per-second="20deg"
+            shadow-intensity="0"
+            exposure="1.1"
+            environment-image="neutral"
+            loading="eager"
+            ar
+            ar-modes="webxr scene-viewer quick-look">
+          </model-viewer>
+          <div id="loadingOverlay" class="loading-overlay hidden">
+            <div class="loading-spinner"></div>
+            <span id="loadingName"></span>
+          </div>
+          <div id="viewerHint" class="viewer-hint">Arrastra para rotar · Scroll para acercar · Doble clic para enfocar</div>
+        </div>
+      </div>
+
+      <!-- Controls below viewer -->
+      <div class="viewer-controls">
+        <button id="btnReset"    class="ctrl-btn"><i data-lucide="rotate-ccw"></i> Restablecer</button>
+        <button id="btnZoomIn"   class="ctrl-btn"><i data-lucide="zoom-in"></i> Acercar</button>
+        <button id="btnZoomOut"  class="ctrl-btn"><i data-lucide="zoom-out"></i> Alejar</button>
+        <div class="ctrl-spacer"></div>
+        <button id="btnAutoRotate" class="ctrl-btn active" title="Auto-rotación"><i data-lucide="refresh-cw"></i></button>
+        <button id="btnFullscreen" class="ctrl-btn" title="Pantalla completa"><i data-lucide="maximize"></i> Pantalla completa</button>
+      </div>
+
+      <!-- Below viewer: Gallery + Compare -->
+      <div class="below-viewer">
+
+        <!-- Galería Educativa -->
+        <div class="below-card" id="gallerySection">
+          <div class="below-card-hdr" data-target="galleryBody">
+            <span class="below-card-title">GALERÍA EDUCATIVA</span>
+            <button class="collapse-btn" data-target="galleryBody"><i data-lucide="chevron-down"></i></button>
+          </div>
+          <div id="galleryBody" class="below-card-body">
+            <div class="edu-gallery">
+              <div class="edu-item" id="anatCard" title="Ver diagrama de estructura interna">
+                <img id="anatImg" src="" alt="Anatomía" onerror="this.style.opacity='0.3'">
+                <span>Anatomía</span>
+              </div>
+              <div class="edu-item" id="fichaCard" title="Ver ficha de datos">
+                <img id="fichaImg" src="" alt="Ficha visual" onerror="this.style.opacity='0.3'">
+                <span>Ficha visual</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparar Cuerpos -->
+        <div class="below-card" id="compareSection">
+          <div class="below-card-hdr" data-target="compareBody">
+            <span class="below-card-title">COMPARAR CUERPOS</span>
+            <button class="collapse-btn" data-target="compareBody"><i data-lucide="chevron-down"></i></button>
+          </div>
+          <div id="compareBody" class="below-card-body">
+            <div class="compare-chips" id="compareChips">
+              <!-- populated by JS -->
+            </div>
+            <div class="compare-selects">
+              <select id="compareA"></select>
+              <div class="cmp-vs-badge">VS</div>
+              <select id="compareB"></select>
+            </div>
+            <button id="btnOpenCompare" class="compare-open-btn">
+              <i data-lucide="columns-2"></i> Abrir comparación
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Right column -->
+    <aside class="right-column">
+
+      <!-- Detalles del cuerpo -->
+      <div class="right-card" id="detailCard">
+        <div class="right-card-hdr" data-target="detailBody">
+          <span class="right-card-title">DETALLES DEL CUERPO</span>
+          <button class="collapse-btn" data-target="detailBody"><i data-lucide="chevron-down"></i></button>
+        </div>
+        <div id="detailBody" class="right-card-body detail-grid">
+          <div class="detail-placeholder">
+            <div class="placeholder-orbit"></div>
+            <p>Selecciona un cuerpo celeste</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notas / Curiosidades -->
+      <div class="right-card" id="notasCard">
+        <div class="right-card-hdr" data-target="notasBody">
+          <span class="right-card-title">NOTAS Y CURIOSIDADES</span>
+          <button class="collapse-btn" data-target="notasBody"><i data-lucide="chevron-down"></i></button>
+        </div>
+        <div id="notasBody" class="right-card-body">
+          <div class="detail-placeholder" style="padding:20px;font-size:12px">—</div>
+        </div>
+      </div>
+
+    </aside>
+  </div><!-- /.workspace -->
+
+  <!-- ── Galería completa (overlay) ── -->
+  <div id="galeria-overlay" class="overlay hidden">
+    <div class="overlay-inner">
+      <div class="overlay-hdr">
+        <h2>Galería del Sistema Solar</h2>
+        <button class="overlay-close" id="closeGaleria"><i data-lucide="x"></i></button>
+      </div>
+      <div id="galeriaCuerpos" class="gallery-grid"></div>
+    </div>
+  </div>
+
+  <!-- ── Biblioteca (overlay) ── -->
+  <div id="biblioteca-overlay" class="overlay hidden">
+    <div class="overlay-inner overlay-narrow">
+      <div class="overlay-hdr">
+        <h2>Biblioteca Astronómica</h2>
+        <button class="overlay-close" id="closeBiblioteca"><i data-lucide="x"></i></button>
+      </div>
+      <div id="bibliotecaContent"></div>
+    </div>
+  </div>
+
+  <!-- ── Cuaderno (overlay) ── -->
+  <div id="cuaderno-overlay" class="overlay hidden">
+    <div class="overlay-inner overlay-narrow">
+      <div class="overlay-hdr">
+        <h2>Cuaderno de Notas</h2>
+        <button class="overlay-close" id="closeCuaderno"><i data-lucide="x"></i></button>
+      </div>
+      <div id="cuadernoContent">
+        <div class="cuaderno-body-hdr" id="cuadernoBodyHdr">
+          <div class="detail-placeholder" style="padding:16px;font-size:12px">
+            Selecciona un cuerpo celeste en el Explorador para tomar notas
+          </div>
+        </div>
+        <textarea id="cuadernoNota" class="cuaderno-textarea" placeholder="Escribe tus observaciones, notas de clase o reflexiones sobre este cuerpo celeste…" rows="8"></textarea>
+        <div class="cuaderno-actions">
+          <button id="btnGuardarNota" class="compare-open-btn" style="width:auto;padding:8px 20px">
+            <i data-lucide="save"></i> Guardar nota
+          </button>
+          <button id="btnBorrarNota" class="ctrl-btn" style="color:#e57373;border-color:#e5737355">
+            <i data-lucide="trash-2"></i> Borrar
+          </button>
+        </div>
+        <div class="cuaderno-todas" id="cuadernoTodas"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Ajustes (overlay) ── -->
+  <div id="ajustes-overlay" class="overlay hidden">
+    <div class="overlay-inner overlay-narrow">
+      <div class="overlay-hdr">
+        <h2>Ajustes</h2>
+        <button class="overlay-close" id="closeAjustes"><i data-lucide="x"></i></button>
+      </div>
+      <div class="ajustes-list">
+        <label class="ajuste-row">
+          <span>Fondo estelar animado</span>
+          <input type="checkbox" id="ajusteStars" checked>
+        </label>
+        <label class="ajuste-row">
+          <span>Auto-rotación al cargar</span>
+          <input type="checkbox" id="ajusteAutoRotate" checked>
+        </label>
+        <label class="ajuste-row">
+          <span>Mostrar pista de controles</span>
+          <input type="checkbox" id="ajusteHint" checked>
+        </label>
+        <div class="ajuste-row ajuste-info">
+          <span>Versión</span><span>1.2.0</span>
+        </div>
+        <div class="ajuste-row ajuste-info">
+          <span>Modelos</span><span>NASA Open Data</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Comparación modal ── -->
+  <div id="compareModal" class="modal hidden">
+    <div class="modal-box">
+      <button id="closeCompare" class="modal-close"><i data-lucide="x"></i></button>
+      <h2 class="modal-title">Comparar Cuerpos Celestes</h2>
+      <div id="compareContent"></div>
+    </div>
+  </div>
+
+  <!-- ── Lightbox imagen ── -->
+  <div id="lightbox" class="lightbox hidden">
+    <div class="lightbox-backdrop"></div>
+    <div class="lightbox-box">
+      <button class="lightbox-close"><i data-lucide="x"></i></button>
+      <img id="lightboxImg" src="" alt="">
+      <div id="lightboxCaption" class="lightbox-caption"></div>
+    </div>
+  </div>
+
+  <!-- ── Toast ── -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
