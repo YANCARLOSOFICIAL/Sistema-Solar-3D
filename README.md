@@ -8,7 +8,7 @@ Aplicativo web educativo interactivo para explorar el Sistema Solar en 3D, permi
 
 | Explorador 3D | Studio de Ensamblaje |
 |---|---|
-| ![Explorador](CuerpoHumanoStudio.png) | ![Studio](ss_studio2.png) |
+| ![Explorador](galeria.png) | ![Studio](main.png) | 
 
 ---
 
