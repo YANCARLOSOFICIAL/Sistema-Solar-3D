@@ -71,8 +71,8 @@ html, body {
 .search-wrap input::placeholder { color: var(--text3); }
 
 .organ-list { flex: 1; overflow-y: auto; padding: 6px 0; }
-.organ-list::-webkit-scrollbar { width: 3px; }
-.organ-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+.organ-list::-webkit-scrollbar { width: 5px; }
+.organ-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 5px; }
 
 .list-section { margin-bottom: 4px; }
 .list-section-title {
@@ -86,7 +86,11 @@ html, body {
   border-left: 2px solid transparent; transition: all .15s;
 }
 .organ-item:hover  { background: var(--surface2); }
-.organ-item.active { background: rgba(79,195,247,.07); border-left-color: var(--accent); }
+.organ-item.active {
+  background: linear-gradient(90deg, rgba(79,195,247,.15) 0%, rgba(79,195,247,.04) 100%);
+  border-left-color: var(--accent);
+  border-left-width: 3px;
+}
 
 .organ-thumb-wrap {
   width: 36px; height: 36px; border-radius: 50%;
@@ -105,16 +109,17 @@ html, body {
   overflow: hidden; text-overflow: ellipsis;
 }
 .organ-system { font-size: 10.5px; color: var(--text3); margin-top: 1px; }
-.organ-item.active .organ-name,
 .organ-item:hover  .organ-name { color: var(--text); }
+.organ-item.active .organ-name { color: var(--accent); }
+.organ-item.active .organ-system { color: var(--text2); }
 
 /* ── Center column ───────────────────────────────────────────────────────── */
 .center-column {
   display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
   background: var(--bg);
 }
-.center-column::-webkit-scrollbar { width: 3px; }
-.center-column::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+.center-column::-webkit-scrollbar { width: 5px; }
+.center-column::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 5px; }
 
 /* Viewer header */
 .viewer-header {
@@ -162,6 +167,7 @@ html, body {
 .viewer-stage {
   position: relative; height: calc(100vh - var(--topbar-h) - 48px - 44px - 296px);
   min-height: 280px; max-height: 560px; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 35%, #0d1e3c 0%, #080e1c 55%, #06090f 100%);
 }
 
 #starCanvas {
@@ -295,8 +301,8 @@ model-viewer {
   background: var(--surface); border-left: 1px solid var(--border);
   overflow-y: auto; display: flex; flex-direction: column;
 }
-.right-column::-webkit-scrollbar { width: 3px; }
-.right-column::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+.right-column::-webkit-scrollbar { width: 5px; }
+.right-column::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 5px; }
 
 .right-card { border-bottom: 1px solid var(--border); }
 .right-card-hdr {
@@ -337,7 +343,12 @@ model-viewer {
   padding: 9px 0; border-bottom: 1px solid var(--border);
 }
 .detail-field:last-child { border-bottom: none; }
-.detail-field svg { width: 15px; height: 15px; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+.field-icon {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(79,195,247,.1); border: 1px solid rgba(79,195,247,.18);
+  display: flex; align-items: center; justify-content: center; margin-top: 1px;
+}
+.field-icon svg { width: 13px; height: 13px; color: var(--accent); }
 .detail-field > div { display: flex; flex-direction: column; gap: 2px; }
 .field-label { font-size: 9.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); }
 .field-value { font-size: 12.5px; color: var(--text2); line-height: 1.4; }
@@ -479,8 +490,8 @@ model-viewer {
   width: min(780px,96vw); max-height: 88vh; overflow-y: auto;
   padding: 28px; position: relative;
 }
-.modal-box::-webkit-scrollbar { width: 3px; }
-.modal-box::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+.modal-box::-webkit-scrollbar { width: 5px; }
+.modal-box::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 5px; }
 .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 22px; color: var(--text); }
 .modal-close {
   position: absolute; top: 14px; right: 14px;
@@ -576,6 +587,54 @@ model-viewer {
 /* ── Biblioteca item hover ───────────────────────────────────────────────── */
 .bib-item-clickable { cursor: pointer; transition: background .15s; border-radius: 6px; }
 .bib-item-clickable:hover { background: var(--surface3); }
+
+/* ── Compare modal — 2-column hero layout ─────────────────────────────────── */
+.cmp-2col {
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 0;
+  margin-bottom: 24px;
+}
+.cmp-col {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+  border-top: 3px solid var(--body-color, var(--border2));
+}
+.cmp-col-hero {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, var(--surface3) 0%, var(--surface2) 100%);
+  border-bottom: 1px solid var(--border);
+}
+.cmp-col-hero img {
+  width: 48px; height: 48px; border-radius: 50%; object-fit: cover;
+  border: 2px solid var(--border2); flex-shrink: 0;
+}
+.cmp-col-name { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1.1; }
+.cmp-col-type { font-size: 10.5px; color: var(--text3); font-weight: 600; letter-spacing: .4px; }
+
+.cmp-dl { padding: 12px 16px; display: grid; grid-template-columns: auto 1fr; gap: 0; }
+.cmp-dl dt {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+  color: var(--text3); padding: 6px 12px 6px 0; border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.cmp-dl dd {
+  font-size: 12px; color: var(--text2); padding: 6px 0;
+  border-bottom: 1px solid var(--border); line-height: 1.45;
+}
+.cmp-dl dt:last-of-type,
+.cmp-dl dd:last-of-type { border-bottom: none; }
+
+.cmp-vs-bar {
+  display: flex; align-items: center; justify-content: center;
+  width: 44px; font-size: 11px; font-weight: 800; color: var(--text3);
+  letter-spacing: 1px;
+}
+
+.cmp-table-section { margin-top: 4px; }
+.cmp-table-title {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 10px;
+}
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 1200px) {

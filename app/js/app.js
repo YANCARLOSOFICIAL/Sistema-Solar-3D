@@ -97,13 +97,25 @@ function selectBody(body) {
   anatImg.style.opacity  = '';
   fichaImg.style.opacity = '';
 
+  // Sync compareA to selected body; auto-swap compareB if it would duplicate
+  const cmpA = $('compareA');
+  const cmpB = $('compareB');
+  cmpA.value = body.id;
+  if (cmpB.value === body.id) {
+    const other = BODIES.find(b => b.id !== body.id);
+    if (other) cmpB.value = other.id;
+  }
+
   renderDetalles(body);
   renderNotas(body);
   renderCompareChips();
 }
 
 modelViewer.addEventListener('load',  () => loadingOverlay.classList.add('hidden'));
-modelViewer.addEventListener('error', () => loadingOverlay.classList.add('hidden'));
+modelViewer.addEventListener('error', () => {
+  loadingOverlay.classList.add('hidden');
+  toast('Error al cargar el modelo 3D');
+});
 
 // ── Right panel: details ──────────────────────────────────────────────────────
 function renderDetalles(body) {
@@ -119,24 +131,31 @@ function renderDetalles(body) {
 
     <div class="detail-fields">
       <div class="detail-field">
-        <i data-lucide="zap"></i>
+        <div class="field-icon"><i data-lucide="zap"></i></div>
         <div>
           <span class="field-label">FUNCIÓN</span>
           <span class="field-value">${body.funcion}</span>
         </div>
       </div>
       <div class="detail-field">
-        <i data-lucide="map-pin"></i>
+        <div class="field-icon"><i data-lucide="map-pin"></i></div>
         <div>
           <span class="field-label">UBICACIÓN</span>
           <span class="field-value">${body.ubicacion}</span>
         </div>
       </div>
       <div class="detail-field">
-        <i data-lucide="link"></i>
+        <div class="field-icon"><i data-lucide="link"></i></div>
         <div>
           <span class="field-label">RELACIÓN</span>
           <span class="field-value">${body.relacion}</span>
+        </div>
+      </div>
+      <div class="detail-field">
+        <div class="field-icon"><i data-lucide="ruler"></i></div>
+        <div>
+          <span class="field-label">TAMAÑO</span>
+          <span class="field-value">${body.tamano}</span>
         </div>
       </div>
     </div>
@@ -208,29 +227,46 @@ function renderCompareModal() {
   if (!A || !B) return;
   const allKeys = [...new Set([...Object.keys(A.datos), ...Object.keys(B.datos)])];
 
+  const colHTML = body => `
+    <div class="cmp-col" style="--body-color:${body.color}">
+      <div class="cmp-col-hero">
+        <img src="../app-assets/miniaturas/${body.id}.jpg" alt="${body.name}"
+          onerror="this.style.display='none'">
+        <div>
+          <h3 class="cmp-col-name">${body.name}</h3>
+          <span class="cmp-col-type">${body.categoria}</span>
+        </div>
+      </div>
+      <dl class="cmp-dl">
+        <dt>Función</dt><dd>${body.funcion}</dd>
+        <dt>Ubicación</dt><dd>${body.ubicacion}</dd>
+        <dt>Relación</dt><dd>${body.relacion}</dd>
+        <dt>Tamaño</dt><dd>${body.tamano}</dd>
+        <dt>Importancia</dt><dd>${body.importancia}</dd>
+        <dt>Dato curioso</dt><dd>${body.datoCurioso}</dd>
+      </dl>
+    </div>`;
+
   $('compareContent').innerHTML = `
-    <div class="cmp-heads">
-      <div class="cmp-head">
-        <div class="cmp-dot" style="background:${A.color};box-shadow:0 0 10px ${A.color}99"></div>
-        <div><strong>${A.name}</strong><span>${A.categoria}</span></div>
-      </div>
-      <div class="cmp-vs-center">VS</div>
-      <div class="cmp-head">
-        <div class="cmp-dot" style="background:${B.color};box-shadow:0 0 10px ${B.color}99"></div>
-        <div><strong>${B.name}</strong><span>${B.categoria}</span></div>
-      </div>
+    <div class="cmp-2col">
+      ${colHTML(A)}
+      <div class="cmp-vs-bar">VS</div>
+      ${colHTML(B)}
     </div>
-    <table class="cmp-table">
-      <thead><tr><th>Parámetro</th><th>${A.name}</th><th>${B.name}</th></tr></thead>
-      <tbody>
-        ${allKeys.map(k => `
-          <tr>
-            <td class="cmp-key">${k}</td>
-            <td>${A.datos[k] ?? '—'}</td>
-            <td>${B.datos[k] ?? '—'}</td>
-          </tr>`).join('')}
-      </tbody>
-    </table>
+    <div class="cmp-table-section">
+      <div class="cmp-table-title">DATOS COMPARATIVOS</div>
+      <table class="cmp-table">
+        <thead><tr><th>Parámetro</th><th>${A.name}</th><th>${B.name}</th></tr></thead>
+        <tbody>
+          ${allKeys.map(k => `
+            <tr>
+              <td class="cmp-key">${k}</td>
+              <td>${A.datos[k] ?? '—'}</td>
+              <td>${B.datos[k] ?? '—'}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
   `;
 }
 
@@ -361,13 +397,14 @@ function closeLightbox() {
 let toastTimer = null;
 function toast(msg) {
   const el = $('toast');
-  el.textContent = msg;
-  el.classList.remove('hidden');
-  el.classList.add('show');
   clearTimeout(toastTimer);
+  el.classList.remove('show', 'hidden');
+  el.textContent = msg;
+  void el.offsetWidth; // force reflow so CSS transition fires
+  el.classList.add('show');
   toastTimer = setTimeout(() => {
     el.classList.remove('show');
-    el.classList.add('hidden');
+    setTimeout(() => el.classList.add('hidden'), 260);
   }, 2200);
 }
 
@@ -433,8 +470,13 @@ function setMode(mode) {
     modelViewer.setAttribute('rotation-per-second', '10deg');
     toast('Modo 360° activado — rotación automática');
   } else if (mode === 'AR') {
-    modelViewer.activateAR?.();
-    toast('Apunta tu cámara a una superficie plana');
+    if (modelViewer.canActivateAR) {
+      modelViewer.activateAR();
+      toast('Apunta tu cámara a una superficie plana');
+    } else {
+      toast('AR no disponible en este dispositivo');
+      setMode('3D');
+    }
   } else {
     if (state.autoRotate) modelViewer.setAttribute('auto-rotate', '');
     else modelViewer.removeAttribute('auto-rotate');
@@ -523,6 +565,12 @@ function setupEvents() {
   });
   $('compareModal').addEventListener('click', e => { if (e.target === e.currentTarget) $('compareModal').classList.add('hidden'); });
 
+  // Backdrop click-to-close for full-screen overlays
+  ['galeria-overlay','biblioteca-overlay','ajustes-overlay','cuaderno-overlay'].forEach(id => {
+    const el = $(id);
+    if (el) el.addEventListener('click', e => { if (e.target === el) closeAllOverlays(); });
+  });
+
   // Mode tabs
   document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.addEventListener('click', () => setMode(btn.dataset.mode));
@@ -543,14 +591,15 @@ function setupEvents() {
     state.fov = 30;
     modelViewer.setAttribute('camera-orbit', state.currentBody.cameraOrbit);
     modelViewer.setAttribute('field-of-view', `${state.fov}deg`);
+    modelViewer.resetTurntableRotation?.();
     toast('Vista restablecida');
   });
   $('btnZoomIn').addEventListener('click', () => {
-    state.fov = Math.max(10, state.fov - 5);
+    state.fov = Math.max(15, state.fov - 4);
     modelViewer.setAttribute('field-of-view', `${state.fov}deg`);
   });
   $('btnZoomOut').addEventListener('click', () => {
-    state.fov = Math.min(80, state.fov + 5);
+    state.fov = Math.min(50, state.fov + 4);
     modelViewer.setAttribute('field-of-view', `${state.fov}deg`);
   });
   $('btnAutoRotate').addEventListener('click', () => {
@@ -575,17 +624,15 @@ function setupEvents() {
   // Gallery items (anatomy / ficha)
   $('anatCard').addEventListener('click', () => {
     if (!state.currentBody) return;
-    const lb = $('lightbox');
     $('lightboxImg').src = `../app-assets/anatomia/${state.currentBody.id}.png`;
-    $('lightboxCaption').textContent = `${state.currentBody.name} — Estructura Interna`;
-    lb.classList.remove('hidden');
+    $('lightboxCaption').textContent = state.currentBody.importancia;
+    $('lightbox').classList.remove('hidden');
   });
   $('fichaCard').addEventListener('click', () => {
     if (!state.currentBody) return;
-    const lb = $('lightbox');
     $('lightboxImg').src = `../app-assets/datos_importantes/${state.currentBody.id}.png`;
-    $('lightboxCaption').textContent = `${state.currentBody.name} — Ficha Visual`;
-    lb.classList.remove('hidden');
+    $('lightboxCaption').textContent = state.currentBody.descripcion;
+    $('lightbox').classList.remove('hidden');
   });
 
   // Lightbox
