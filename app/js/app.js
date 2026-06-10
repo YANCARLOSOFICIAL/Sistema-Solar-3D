@@ -92,10 +92,12 @@ function selectBody(body) {
   viewerTitle.textContent = body.name;
   viewerSystem.textContent = body.clasificacion;
 
+  anatImg.style.display  = '';
+  fichaImg.style.display = '';
   anatImg.src  = `../app-assets/anatomia/${body.id}.png`;
   fichaImg.src = `../app-assets/datos_importantes/${body.id}.png`;
-  anatImg.style.opacity  = '';
-  fichaImg.style.opacity = '';
+  anatImg.onerror  = () => { anatImg.style.display  = 'none'; };
+  fichaImg.onerror = () => { fichaImg.style.display = 'none'; };
 
   // Sync compareA to selected body; auto-swap compareB if it would duplicate
   const cmpA = $('compareA');
